@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seleccionar Tipo de Túnel</title>
+     <style>
+ 
+        h1 {
+            color: #4CAF50;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        ul li {
+            margin: 5px 0;
+        }
+        ul li a {
+            text-decoration: none;
+            color: #007BFF;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        ul li a.selected {
+            background-color: #007BFF;
+            color: white;
+        }
+.hidden {
+    display: none;
+}
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        @keyframes neonPulse {
+            0% { box-shadow: 0 0 5px #0ff, 0 0 10px #0ff, 0 0 20px #0ff; }
+            50% { box-shadow: 0 0 10px #f0f, 0 0 20px #f0f, 0 0 40px #f0f; }
+            100% { box-shadow: 0 0 5px #0ff, 0 0 10px #0ff, 0 0 20px #0ff; }
+        }
+
+        @keyframes borderFlow {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 200% 0%; }
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+    margin: 20px;
+    padding: 20px;
+    background-color: #000;
+        }
+
+        .container {
+            background: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transition: transform 0.8s;
+        }
+
+        .form-container.flip {
+            transform: rotateY(180deg);
+        }
+
+        .login-form, .signup-form {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            padding: 40px;
+            backface-visibility: hidden;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid transparent;
+            border-radius: 15px;
+            animation: neonPulse 2s infinite;
+            backdrop-filter: blur(10px);
+        }
+
+        .signup-form {
+            transform: rotateY(180deg);
+        }
+
+        .form-container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(90deg, #0ff, #f0f, #0ff);
+            background-size: 200% 100%;
+            animation: borderFlow 2s linear infinite;
+            border-radius: 15px;
+            z-index: -1;
+        }
+
+        h2 {
+            color: #0ff;
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px #0ff;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 2;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid #0ff;
+            color: #000000;
+            border-radius: 5px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            box-shadow: 0 0 15px #0ff;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(90deg, #0ff, #f0f);
+            border: none;
+            color: #000;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            z-index: 2;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px #f0f;
+        }
+
+        .switch-form {
+            color: #0ff;
+            text-align: center;
+            margin-top: 20px;
+            cursor: pointer;
+            text-decoration: underline;
+            position: relative;
+            z-index: 2;
+        }
+
+        .switch-form:hover {
+            color: #f0f;
+            text-shadow: 0 0 10px #f0f;
+        }
+
+        .ai-logo {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 100px;
+            border: 2px solid #0ff;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: neonPulse 2s infinite;
+            z-index: 2;
+        }
+
+        @keyframes matrixRain {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100vh); }
+        }
+
+        .matrix-rain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            background: transparent;
+        }
+
+        .matrix-column {
+            position: absolute;
+            width: 20px;
+            font-family: monospace;
+            font-size: 20px;
+            color: #0f0;
+            opacity: 0.8;
+            transform: translateY(-100%);
+            animation: matrixRain linear infinite;
+            white-space: nowrap;
+        }
+    </style>
+    
+
+    <script>
+        function setTunnel(tunnel) {
+            document.cookie = "selectedTunnel=" + tunnel + "; path=/";
+            loadContent(tunnel);
+            highlightSelectedTunnel(tunnel); // Resaltar el túnel seleccionado
+        }
+
+        function getSelectedTunnel() {
+            const name = "selectedTunnel=";
+            const decodedCookie = decodeURIComponent(document.cookie);
+            const ca = decodedCookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                const c = ca[i].trim();
+                if (c.indexOf(name) === 0) {
+                    return c.substring(name.length, c.length);
+                }
+            }
+            return "";
+        }
+
+        function loadContent(tunnel) {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', tunnel, true);
+            xhr.onload = function() {
+                if (this.status === 200) {
+                    document.getElementById('content').innerHTML = this.responseText;
+                    // Agregar un manejador para el formulario cargado
+                    const form = document.getElementById('serverForm');
+                    if (form) {
+                        form.addEventListener('submit', function(e) {
+                            e.preventDefault(); // Evita el envío tradicional del formulario
+                            const formData = new FormData(form);
+                            fetch('process.php', {
+                                method: 'POST',
+                                body: formData
+                            })
+                            .then(response => response.text())
+                            .then(data => {
+                                document.getElementById('result').innerHTML = data; // Muestra la respuesta
+                            })
+                            .catch(error => console.error('Error:', error));
+                        });
+                    }
+                } else {
+                    document.getElementById('content').innerHTML = 'Error al cargar el archivo.';
+                }
+            };
+            xhr.send();
+        }
+
+        function highlightSelectedTunnel(tunnel) {
+            const links = document.querySelectorAll("ul li a");
+            links.forEach(link => {
+                link.classList.remove("selected");
+                if (link.href.includes(tunnel)) {
+                    link.classList.add("selected"); // Añadir clase 'selected' al enlace correspondiente
+                }
+            });
+        }
+
+        window.onload = function() {
+            const selectedTunnel = getSelectedTunnel();
+            if (selectedTunnel) {
+                loadContent(selectedTunnel); // Cargar contenido previo
+                highlightSelectedTunnel(selectedTunnel); // Resaltar el enlace seleccionado
+            }
+        };
+    </script>
+</head>
+<body>
+    <h1>Seleccionar Tipo de Túnel</h1>
+    <ul>
+        <li><a href="form_ssh_proxy.html" onclick="setTunnel('form_ssh_proxy.html'); return false;">SSH/Proxy</a></li>
+        <li><a href="form_sslpay.html" onclick="setTunnel('form_sslpay.html'); return false;">SSLPAY</a></li>
+        <li><a href="form_slow_dns.html" onclick="setTunnel('form_slow_dns.html'); return false;">Slow DNS</a></li>
+        <li><a href="form_ssh_ssl.html" onclick="setTunnel('form_ssh_ssl.html'); return false;">SSH/SSL</a></li>
+        <li><a href="form_direct.html" onclick="setTunnel('form_direct.html'); return false;">Direct</a></li>
+    </ul>
+    <div id="content">
+        <!-- Aquí se cargará el contenido de los archivos HTML -->
+    </div>
+    <div id="result">
+        <!-- Aquí se mostrará la respuesta de process.php -->
+    </div>
+</body>
+<script>
+    function flipForm() {
+        document.getElementById('formContainer').classList.toggle('flip');
+    }
+
+    function createMatrixRain() {
+        const container = document.getElementById('matrixRain');
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*';
+        const columns = Math.floor(window.innerWidth / 20);
+
+        for (let i = 0; i < columns; i++) {
+            const column = document.createElement('div');
+            column.className = 'matrix-column';
+            column.style.left = i * 20 + 'px';
+            column.style.animationDuration = Math.random() * 2 + 1 + 's';
+            column.style.animationDelay = Math.random() * 2 + 's';
+
+            let text = '';
+            const columnHeight = Math.floor(Math.random() * 20 + 10);
+            for (let j = 0; j < columnHeight; j++) {
+                text += characters[Math.floor(Math.random() * characters.length)] + '\n';
+            }
+            column.textContent = text;
+
+            container.appendChild(column);
+        }
+    }
+
+    // Inicializa o efeito Matrix
+    createMatrixRain();
+
+    // Recria o efeito quando a janela é redimensionada
+    window.addEventListener('resize', () => {
+        const container = document.getElementById('matrixRain');
+        container.innerHTML = '';
+        createMatrixRain();
+    });
+
+    // Atualização periódica dos caracteres
+    setInterval(() => {
+        const columns = document.querySelectorAll('.matrix-column');
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*';
+        
+        columns.forEach(column => {
+            let text = '';
+            const columnHeight = Math.floor(Math.random() * 20 + 10);
+            for (let j = 0; j < columnHeight; j++) {
+                text += characters[Math.floor(Math.random() * characters.length)] + '\n';
+            }
+            column.textContent = text;
+        });
+    }, 5000);
+</script>
+</html>
